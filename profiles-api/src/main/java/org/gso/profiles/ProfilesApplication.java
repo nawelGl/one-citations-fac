@@ -2,8 +2,27 @@ package org.gso.profiles;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.OAuthFlow;
+import io.swagger.v3.oas.annotations.security.OAuthFlows;
+import io.swagger.v3.oas.annotations.security.OAuthScope;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 
 @SpringBootApplication
+@SecurityScheme(
+    name = "Keycloak",
+    type = SecuritySchemeType.OAUTH2,
+    flows = @OAuthFlows(
+        authorizationCode = @OAuthFlow(
+            authorizationUrl = "http://localhost:8080/realms/one-citations/protocol/openid-connect/auth",
+            tokenUrl = "http://localhost:8080/realms/one-citations/protocol/openid-connect/token",
+            scopes = {
+                @OAuthScope(name = "openid", description = "openid"),
+                @OAuthScope(name = "profile", description = "profile")
+            }
+        )
+    )
+)
 public class ProfilesApplication {
 
 	public static void main(String[] args) {
