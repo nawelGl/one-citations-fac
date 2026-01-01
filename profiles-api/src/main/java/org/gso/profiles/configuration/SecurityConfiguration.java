@@ -28,8 +28,12 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         log.debug("Security configuration activated");
+        //Pour les POST Swagger
+        http.csrf(csrf -> csrf.disable());
         http.cors(withDefaults());
         http.authorizeHttpRequests(authorize -> authorize
+                .requestMatchers("/swagger-ui/**","/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html")
+                .permitAll()
                 .requestMatchers("/api/v1/**")
                 .fullyAuthenticated());
         http.oauth2ResourceServer(oauth2 -> oauth2
