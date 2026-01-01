@@ -2,7 +2,6 @@ package org.gso.profiles.endpoint;
 
 import java.net.URI;
 import java.util.List;
-
 import com.github.rutledgepaulv.qbuilders.builders.GeneralQueryBuilder;
 import com.github.rutledgepaulv.qbuilders.conditions.Condition;
 import com.github.rutledgepaulv.qbuilders.visitors.MongoVisitor;
@@ -33,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Slf4j
 @RestController
@@ -41,6 +41,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
         produces = MediaType.APPLICATION_JSON_VALUE
 )
 @RequiredArgsConstructor
+@Tag(name = "Profile API", description = "Endpoints pour la gestion des profils utilisateurs")
 public class ProfileController {
 
     public static final String PATH = "/api/v1/profiles";
