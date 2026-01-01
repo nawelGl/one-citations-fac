@@ -17,8 +17,8 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
             authorizationUrl = "http://localhost:8080/realms/one-citations/protocol/openid-connect/auth",
             tokenUrl = "http://localhost:8080/realms/one-citations/protocol/openid-connect/token",
             scopes = {
-                @OAuthScope(name = "openid", description = "openid"),
-                @OAuthScope(name = "profile", description = "profile")
+                @OAuthScope(name = "profile", description = "access profile"),
+                @OAuthScope(name = "email", description = "access email")
             }
         )
     )

@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Slf4j
@@ -41,6 +42,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
         produces = MediaType.APPLICATION_JSON_VALUE
 )
 @RequiredArgsConstructor
+@SecurityRequirement(name = "Keycloak")
 @Tag(name = "Profile API", description = "Endpoints pour la gestion des profils utilisateurs")
 public class ProfileController {
 
