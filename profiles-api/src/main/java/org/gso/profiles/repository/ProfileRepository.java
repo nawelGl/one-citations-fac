@@ -13,6 +13,4 @@ public interface ProfileRepository extends PagingAndSortingRepository<ProfileMod
     Page<ProfileModel> findByMail(String mail, Pageable pageable);
 
     ProfileModel findByMail(String mail);
-
-    ProfileModel save(ProfileModel profile);
 }

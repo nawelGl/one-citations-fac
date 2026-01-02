@@ -23,7 +23,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -72,11 +71,36 @@ public class ProfileController {
         return ResponseEntity.ok(profileService.getProfile(profileId).toDto());
     }
 
-    @PutMapping(path = "/{id}", consumes = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<ProfileDto> updateProfile(@PathVariable("id") @NonNull String profileId,
-                                                    @RequestBody @NonNull ProfileDto profileDto) {
-        profileDto = profileDto.withId(profileId);
-        return ResponseEntity.ok(profileService.updateProfile(profileDto.toModel()).toDto());
+    // @PutMapping(path = "/{id}", consumes = { MediaType.APPLICATION_JSON_VALUE })
+    // public ResponseEntity<ProfileDto> updateProfile(@PathVariable("id") @NonNull String profileId,
+    //                                                 @RequestBody @NonNull ProfileDto profileDto) {
+    //     profileDto = profileDto.withId(profileId);
+    //     return ResponseEntity.ok(profileService.updateProfile(profileDto.toModel()).toDto());
+    // }
+
+    @PutMapping("/current")
+    public ResponseEntity<ProfileDto> updateProfile(@AuthenticationPrincipal Jwt jwt, 
+            @RequestBody @NonNull ProfileDto profileDto) {
+            String email = jwt.getClaimAsString("email");
+            ProfileModel profile = profileService.findByMail(email);
+
+            if (profile == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            if (profileDto.firstName() != null) {
+                profile.setFirstName(profileDto.firstName());
+            }
+            if (profileDto.lastName() != null) {
+                profile.setLastName(profileDto.lastName());
+            }
+            if (profileDto.age() >= 13) {
+                profile.setAge(profileDto.age());
+            }
+
+            ProfileModel savedProfile = profileService.save(profile);
+
+        return ResponseEntity.ok(savedProfile.toDto());
     }
 
     @GetMapping
@@ -110,9 +134,6 @@ public class ProfileController {
 
     @GetMapping("/current")
     public ResponseEntity<ProfileDto> getCurrentUserProfile(@AuthenticationPrincipal Jwt jwt) {
-        log.info("### TOKEN REÇU ###");
-        log.info("Email détecté : " + jwt.getClaimAsString("email"));
-
         String email = jwt.getClaimAsString("email");
         String userId = jwt.getSubject();
 
