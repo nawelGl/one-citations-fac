@@ -21,6 +21,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,6 +53,7 @@ public class ProfileController {
 
     private final ProfileService profileService;
     private final QueryConversionPipeline pipeline = QueryConversionPipeline.defaultPipeline();
+
 
     @PostMapping(consumes = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<ProfileDto> createProfile(@RequestBody ProfileDto profileDto) {
@@ -98,9 +101,38 @@ public class ProfileController {
                 .body(pageResults);
     }
 
+    // @GetMapping("/current")
+    // public ResponseEntity<JwtAuthenticationToken> getCurrentUserProfile(JwtAuthenticationToken principal) {
+    //     // log.info("Test de récupération du claim email :");
+    //     // log.info(principal.getToken().getClaims().get("email").toString());
+    //     return ResponseEntity.ok(principal);
+    // }
+
     @GetMapping("/current")
-    public ResponseEntity<JwtAuthenticationToken> getCurrentUserProfile(JwtAuthenticationToken principal) {
-        return ResponseEntity.ok(principal);
+    public ResponseEntity<ProfileDto> getCurrentUserProfile(@AuthenticationPrincipal Jwt jwt) {
+        log.info("### TOKEN REÇU ###");
+        log.info("Email détecté : " + jwt.getClaimAsString("email"));
+
+        String email = jwt.getClaimAsString("email");
+        String userId = jwt.getSubject();
+
+        ProfileModel profile = profileService.findByMail(email);
+
+        if (profile == null) {
+            log.info("Utilisateur inconnu en base. Création automatique...");
+
+            profile = ProfileModel.builder()
+                    .mail(email)
+                    .userId(userId)
+                    .firstName(jwt.getClaimAsString("given_name"))
+                    .lastName(jwt.getClaimAsString("family_name"))
+                    .age(18)
+                    .build();
+
+            profile = profileService.save(profile);
+        }
+
+        return ResponseEntity.ok(profile.toDto());
     }
 
     /**

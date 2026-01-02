@@ -39,4 +39,11 @@ public class ProfileService {
         return profileRepository.findByMail(mail, pageable);
     }
 
+    public ProfileModel findByMail(String mail) {
+        return profileRepository.findByMail(mail);
+    }
+
+    public ProfileModel save(ProfileModel profile) {
+        return profileRepository.save(profile);
+    }
 }
