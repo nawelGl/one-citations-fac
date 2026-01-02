@@ -7,5 +7,5 @@ logging:
   level:
     org:
       springframework:
-        security: debug
+        security: info
       gso: debug
