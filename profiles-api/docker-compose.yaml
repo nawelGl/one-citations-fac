@@ -4,10 +4,10 @@ services:
     ports:
       - "27017:27017"
 
-  profiles-api:
+  profile:
     build: ./profiles-api
     ports:
-      - "9090:9090"
+      - "9080:9090"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:

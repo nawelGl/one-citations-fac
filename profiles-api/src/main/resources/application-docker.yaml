@@ -1,4 +1,9 @@
 spring:
   data:
     mongodb:
-      host: mongo
+      uri: mongodb://mongo:27017/one-citations-profile
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://keycloak:8080/realms/one-citations/protocol/openid-connect/certs
