@@ -71,13 +71,7 @@ public class ProfileController {
     public ResponseEntity<ProfileDto> getProfile(@PathVariable("id") @NonNull String profileId) {
         return ResponseEntity.ok(profileService.getProfile(profileId).toDto());
     }
-
-    // @PutMapping(path = "/{id}", consumes = { MediaType.APPLICATION_JSON_VALUE })
-    // public ResponseEntity<ProfileDto> updateProfile(@PathVariable("id") @NonNull String profileId,
-    //                                                 @RequestBody @NonNull ProfileDto profileDto) {
-    //     profileDto = profileDto.withId(profileId);
-    //     return ResponseEntity.ok(profileService.updateProfile(profileDto.toModel()).toDto());
-    // }
+    
 
     @PutMapping("/current")
     public ResponseEntity<ProfileDto> updateProfile(@AuthenticationPrincipal Jwt jwt, 
@@ -155,13 +149,6 @@ public class ProfileController {
         profileService.delete(profile.getId());
         return ResponseEntity.noContent().build();
     }
-
-    // @GetMapping("/current")
-    // public ResponseEntity<JwtAuthenticationToken> getCurrentUserProfile(JwtAuthenticationToken principal) {
-    //     // log.info("Test de récupération du claim email :");
-    //     // log.info(principal.getToken().getClaims().get("email").toString());
-    //     return ResponseEntity.ok(principal);
-    // }
 
     @GetMapping("/current")
     public ResponseEntity<ProfileDto> getCurrentUserProfile(@AuthenticationPrincipal Jwt jwt) {
