@@ -1,11 +1,15 @@
 spring:
-  data:
-    mongodb:
-      auto-index-creation: true
-      database: one-citations
+  application:
+    name: profiles-api
+  main:
+    allow-bean-definition-overriding: true
+
+server:
+  port: 9090
+
 logging:
   level:
-    org:
-      springframework:
-        security: info
-      gso: debug
+    root: INFO
+    org.springframework.web: INFO
+    org.springframework.security: DEBUG
+    org.gso: DEBUG
