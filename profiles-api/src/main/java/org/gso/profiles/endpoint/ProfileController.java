@@ -24,6 +24,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,10 +49,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class ProfileController {
 
     public static final String PATH = "/api/v1/profiles";
-    private static final int MAX_PAGE_SIZE = 200;
+    //private static final int MAX_PAGE_SIZE = 200;
 
     private final ProfileService profileService;
-    private final QueryConversionPipeline pipeline = QueryConversionPipeline.defaultPipeline();
+    //private final QueryConversionPipeline pipeline = QueryConversionPipeline.defaultPipeline();
 
 
     @PostMapping(consumes = { MediaType.APPLICATION_JSON_VALUE })
@@ -103,26 +104,56 @@ public class ProfileController {
         return ResponseEntity.ok(savedProfile.toDto());
     }
 
+    // @GetMapping
+    // public ResponseEntity<PageDto<ProfileDto>> searchProfile(@RequestParam(required = false) String query,
+    //                                                          @PageableDefault(size = 20) Pageable pageable) {
+    //     Pageable checkedPageable  = checkPageSize(pageable);
+    //     Criteria criteria = convertQuery(query);
+    //     Page<ProfileModel> results = profileService.searchProfiles(criteria, checkedPageable);
+    //     PageDto<ProfileDto> pageResults = toPageDto(results);
+    //     return ResponseEntity
+    //             .status(HttpStatus.OK)
+    //             .body(pageResults);
+    // }
+
+    // @GetMapping(params = "mail")
+    // public ResponseEntity<PageDto<ProfileDto>> searchByMail(@RequestParam String mail,
+    //                                                          @PageableDefault(size = 20) Pageable pageable) {
+    //     Page<ProfileModel> results = profileService.searchByMail(mail, pageable);
+    //     PageDto<ProfileDto> pageResults = toPageDto(results);
+    //     return ResponseEntity
+    //             .status(HttpStatus.OK)
+    //             .body(pageResults);
+    // }
+
     @GetMapping
-    public ResponseEntity<PageDto<ProfileDto>> searchProfile(@RequestParam(required = false) String query,
-                                                             @PageableDefault(size = 20) Pageable pageable) {
-        Pageable checkedPageable  = checkPageSize(pageable);
-        Criteria criteria = convertQuery(query);
-        Page<ProfileModel> results = profileService.searchProfiles(criteria, checkedPageable);
+    public ResponseEntity<PageDto<ProfileDto>> searchProfiles(
+            @RequestParam(required = false) String mail,
+            @PageableDefault(size = 20) Pageable pageable) {
+
+        Page<ProfileModel> results;
+
+        if (mail != null && !mail.isBlank()) {
+            results = profileService.searchByMail(mail, pageable);
+        } else {
+            results = profileService.findAll(pageable);
+        }
         PageDto<ProfileDto> pageResults = toPageDto(results);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(pageResults);
+        return ResponseEntity.ok(pageResults);
     }
 
-    @GetMapping(params = "mail")
-    public ResponseEntity<PageDto<ProfileDto>> searchByMail(@RequestParam String mail,
-                                                             @PageableDefault(size = 20) Pageable pageable) {
-        Page<ProfileModel> results = profileService.searchByMail(mail, pageable);
-        PageDto<ProfileDto> pageResults = toPageDto(results);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(pageResults);
+
+    @DeleteMapping("/current")
+    public ResponseEntity<Void> deleteCurrentUserProfile(@AuthenticationPrincipal Jwt jwt) {
+        String email = jwt.getClaimAsString("email");
+        ProfileModel profile = profileService.findByMail(email);
+
+        if (profile == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        profileService.delete(profile.getId());
+        return ResponseEntity.noContent().build();
     }
 
     // @GetMapping("/current")
@@ -156,29 +187,29 @@ public class ProfileController {
         return ResponseEntity.ok(profile.toDto());
     }
 
-    /**
-     * Convertit une requête RSQL en un objet Criteria compréhensible par la base
-     *
-     * @param stringQuery
-     * @return
-     */
-    private Criteria convertQuery(String stringQuery) {
-        Criteria criteria;
-        if (StringUtils.hasText(stringQuery)) {
-            Condition<GeneralQueryBuilder> condition = pipeline.apply(stringQuery, ProfileModel.class);
-            criteria = condition.query(new MongoVisitor());
-        } else {
-            criteria = new Criteria();
-        }
-        return criteria;
-    }
+    // /**
+    //  * Convertit une requête RSQL en un objet Criteria compréhensible par la base
+    //  *
+    //  * @param stringQuery
+    //  * @return
+    //  */
+    // private Criteria convertQuery(String stringQuery) {
+    //     Criteria criteria;
+    //     if (StringUtils.hasText(stringQuery)) {
+    //         Condition<GeneralQueryBuilder> condition = pipeline.apply(stringQuery, ProfileModel.class);
+    //         criteria = condition.query(new MongoVisitor());
+    //     } else {
+    //         criteria = new Criteria();
+    //     }
+    //     return criteria;
+    // }
 
-    private Pageable checkPageSize(Pageable pageable) {
-        if (pageable.getPageSize() > MAX_PAGE_SIZE) {
-            return PageRequest.of(pageable.getPageNumber(), MAX_PAGE_SIZE);
-        }
-        return pageable;
-    }
+    // private Pageable checkPageSize(Pageable pageable) {
+    //     if (pageable.getPageSize() > MAX_PAGE_SIZE) {
+    //         return PageRequest.of(pageable.getPageNumber(), MAX_PAGE_SIZE);
+    //     }
+    //     return pageable;
+    // }
 
     private PageDto<ProfileDto> toPageDto(Page<ProfileModel> results) {
         List<ProfileDto> profiles = results.map(ProfileModel::toDto).toList();

@@ -46,4 +46,12 @@ public class ProfileService {
     public ProfileModel save(ProfileModel profile) {
         return profileRepository.save(profile);
     }
+
+    public void delete(String id){
+        profileRepository.deleteById(id);
+    }
+
+    public Page<ProfileModel> findAll(Pageable pageable){
+        return profileRepository.findAll(pageable);
+    }
 }
