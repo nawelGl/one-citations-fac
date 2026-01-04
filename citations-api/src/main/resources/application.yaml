@@ -1,3 +1,8 @@
 spring:
   application:
     name: citations-api
+
+server:
+  port: 9091
+  profiles:
+    active: local
