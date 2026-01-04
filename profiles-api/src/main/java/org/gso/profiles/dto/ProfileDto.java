@@ -19,9 +19,9 @@ public record ProfileDto (
         @Min(13) int age,
         String firstName,
         String lastName,
-        @JsonSerialize(using = LocalDateTimeSerializer.class) @JsonFormat(pattern = "YYYY-MM-DD HH:mm:ss")
+        @JsonSerialize(using = LocalDateTimeSerializer.class) @JsonFormat(pattern = "yyyy-MM-DD HH:mm:ss")
         LocalDateTime created,
-        @JsonSerialize(using = LocalDateTimeSerializer.class) @JsonFormat(pattern = "YYYY-MM-DD HH:mm:ss")
+        @JsonSerialize(using = LocalDateTimeSerializer.class) @JsonFormat(pattern = "yyyy-MM-DD HH:mm:ss")
         LocalDateTime modified) {
 
     public ProfileModel toModel() {
