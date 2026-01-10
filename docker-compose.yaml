@@ -21,7 +21,7 @@ services:
   swagger:
     image: swaggerapi/swagger-ui
     environment:
-      SWAGGER_JSON: /doc/citations.yaml
+      URLS: "[ { url: 'http://host.docker.internal:9091/v3/api-docs', name: 'Citations' }, { url: 'http://host.docker.internal:9090/v3/api-docs', name: 'Profiles' } ]"
       DEEP_LINKING: "true"
       OAUTH2_REDIRECT_URL: http://localhost:8888/oauth2-redirect.html
       OAUTH_CLIENT_ID: swagger

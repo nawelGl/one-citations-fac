@@ -1,8 +1,16 @@
+server:
+  port: 9091
+
 spring:
   application:
     name: citations-api
+  
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/citations 
 
-server:
-  port: 9091
-  profiles:
-    active: local
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/one-citations
