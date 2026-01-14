@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.StringUtils;
@@ -34,6 +35,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -55,7 +60,9 @@ public class ProfileController {
     //private final QueryConversionPipeline pipeline = QueryConversionPipeline.defaultPipeline();
 
 
+    @Operation(summary = "Créer un profil manuellement", description = "Création d'un profil (souvent géré auto via /current).")
     @PostMapping(consumes = { MediaType.APPLICATION_JSON_VALUE })
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProfileDto> createProfile(@RequestBody ProfileDto profileDto) {
         ProfileDto createdProdile = profileService.createProfile(profileDto.toModel()).toDto();
         return ResponseEntity
@@ -67,12 +74,22 @@ public class ProfileController {
                 ).body(createdProdile);
     }
 
+    @Operation(summary = "Obtenir un profil par ID", description = "Récupère un profil via son ID technique MongoDB.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Profil trouvé"),
+            @ApiResponse(responseCode = "404", description = "Profil introuvable")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<ProfileDto> getProfile(@PathVariable("id") @NonNull String profileId) {
         return ResponseEntity.ok(profileService.getProfile(profileId).toDto());
     }
-    
 
+    @Operation(summary = "Mettre à jour mon profil", description = "Met à jour les informations (Nom, Prénom, Age) de l'utilisateur connecté.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Profil mis à jour"),
+            @ApiResponse(responseCode = "401", description = "Non authentifié"),
+            @ApiResponse(responseCode = "404", description = "Profil introuvable")
+    })
     @PutMapping("/current")
     public ResponseEntity<ProfileDto> updateProfile(@AuthenticationPrincipal Jwt jwt, 
             @RequestBody @NonNull ProfileDto profileDto) {
@@ -120,6 +137,11 @@ public class ProfileController {
     //             .body(pageResults);
     // }
 
+    @Operation(summary = "Rechercher des profils", description = "Recherche par email ou liste tous les profils (paginé).")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste récupérée"),
+            @ApiResponse(responseCode = "401", description = "Non authentifié")
+    })
     @GetMapping
     public ResponseEntity<PageDto<ProfileDto>> searchProfiles(
             @RequestParam(required = false) String mail,
@@ -137,6 +159,12 @@ public class ProfileController {
     }
 
 
+    @Operation(summary = "Supprimer mon profil", description = "Supprime le profil de l'utilisateur connecté.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Profil supprimé"),
+            @ApiResponse(responseCode = "401", description = "Non authentifié"),
+            @ApiResponse(responseCode = "404", description = "Profil introuvable")
+    })
     @DeleteMapping("/current")
     public ResponseEntity<Void> deleteCurrentUserProfile(@AuthenticationPrincipal Jwt jwt) {
         String email = jwt.getClaimAsString("email");
@@ -150,6 +178,11 @@ public class ProfileController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Obtenir mon profil", description = "Récupère le profil de l'utilisateur connecté. Si le profil n'existe pas, il est créé automatiquement à partir du Token JWT.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Profil récupéré (ou créé)"),
+            @ApiResponse(responseCode = "401", description = "Non authentifié")
+    })
     @GetMapping("/current")
     public ResponseEntity<ProfileDto> getCurrentUserProfile(@AuthenticationPrincipal Jwt jwt) {
         String email = jwt.getClaimAsString("email");
