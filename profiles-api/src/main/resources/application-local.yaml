@@ -7,3 +7,9 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8080/realms/one-citations
+
+springdoc:
+  swagger-ui:
+    oauth:
+      client-id: swagger
+      use-pkce-with-authorization-code-grant: true
