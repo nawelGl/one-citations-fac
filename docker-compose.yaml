@@ -1,41 +1,71 @@
 services:
+  # --- INFRASTRUCTURE ---
   keycloak:
     build: ./keycloak
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: keycloak
       KC_BOOTSTRAP_ADMIN_PASSWORD: keycloak
     ports:
-      - 8080:8080
+      - "8080:8080"
+
   mongo:
     image: mongo
     ports:
       - "27017:27017"
-  profile:
+    volumes:
+      - mongo_data:/data/db
+
+  imgproxy:
+    image: darthsim/imgproxy:latest
+    ports:
+      - "8081:8080"
+    environment:
+      - IMGPROXY_ENABLE_WEBP_DETECTION=true
+
+  # --- APPLICATIONS JAVA ---
+  profiles-api:
     build: ./profiles-api
     ports:
-      - 9080:9090
+      - "9090:9090"
     environment:
-      spring_profiles_active: security,docker
+      - SPRING_PROFILES_ACTIVE=docker, security
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/one-citations
     depends_on:
       - mongo
+      - keycloak
+
+  citations-api:
+    build: ./citations-api
+    ports:
+      - "9091:9091"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/one-citations
+    depends_on:
+      - mongo
+      - profiles-api
+
+  images-api:
+    build: ./images-api
+    ports:
+      - "9092:9092"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/one-citations
+    depends_on:
+      - mongo
+      - imgproxy
+
+  # --- OUTILS ---
   swagger:
     image: swaggerapi/swagger-ui
-    environment:
-      URLS: "[ { url: 'http://host.docker.internal:9091/v3/api-docs', name: 'Citations' }, { url: 'http://host.docker.internal:9090/v3/api-docs', name: 'Profiles' } ]"
-      DEEP_LINKING: "true"
-      OAUTH2_REDIRECT_URL: http://localhost:8888/oauth2-redirect.html
-      OAUTH_CLIENT_ID: swagger
-      OAUTH_USE_PKCE: "true"  
-      OAUTH_REALM: tindeer
-      OAUTH_APP_NAME: swagger
     ports: 
-      - 8888:8080
+      - "8888:8080"
+    environment:
+      URLS: "[ { url: 'http://localhost:9091/v3/api-docs', name: 'Citations' }, { url: 'http://localhost:9090/v3/api-docs', name: 'Profiles' }, { url: 'http://localhost:9092/v3/api-docs', name: 'Images' } ]"
+      DEEP_LINKING: "true"
     volumes:
       - ./swagger:/doc
 
-  imgproxy:
-      image: darthsim/imgproxy:latest
-      ports:
-        - "8081:8080"
-      environment:
-        - IMGPROXY_ENABLE_WEBP_DETECTION=true
+volumes:
+  mongo_data:

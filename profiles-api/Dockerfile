@@ -1,4 +1,4 @@
-FROM gradle:9.0 AS compile
+FROM gradle:8.5-jdk17 AS compile
 COPY . .
 RUN gradle clean build --no-daemon
 
