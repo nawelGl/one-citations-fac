@@ -1,0 +1,26 @@
+server:
+  port: 9092
+
+spring:
+  application:
+    name: images-api
+  
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/images-db
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/one-citations
+          #issuer-uri: http://host.docker.internal:8080/realms/one-citations
+
+logging:
+  level:
+    root: INFO
+    org.gso.images: DEBUG
+    org.springframework.security: WARN
+
+images:
+  proxy-url: http://localhost:8081
