@@ -1,0 +1,63 @@
+_format_version: "2.1"
+_transform: true
+
+services:
+  # Profiles API
+  - name: profiles-service
+    url: http://profiles-api:9090
+    plugins:
+      - name: key-auth
+        config:
+          key_names:
+            - apikey
+    routes:
+      - name: profiles-route
+        paths:
+          - /api/v1/profiles
+        strip_path: false
+
+  # Citations API
+  - name: citations-service
+    url: http://citations-api:9091
+    plugins:
+      - name: key-auth
+        config:
+          key_names:
+            - apikey
+    routes:
+      - name: citations-route
+        paths:
+          - /api/v1/citations
+        strip_path: false
+
+  # Images API
+  - name: images-service
+    url: http://images-api:9092
+    plugins:
+      - name: key-auth
+        config:
+          key_names:
+            - apikey
+    routes:
+      - name: images-route
+        paths:
+          - /api/v1/images
+        strip_path: false
+
+  # Keycloak
+  - name: keycloak-service
+    url: http://keycloak:8080
+    routes:
+      - name: keycloak-route
+        paths:
+          - /auth
+          - /realms
+          - /resources
+          - /robots.txt
+          - /js
+        strip_path: false
+
+consumers:
+  - username: nawel
+    keyauth_credentials:
+      - key: nawel
