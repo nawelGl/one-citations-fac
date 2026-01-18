@@ -49,8 +49,8 @@ public class ImageController {
     @Operation(summary = "Obtenir une image aléatoire")
     @GetMapping("/random")
     public RedirectView getRandomImage(
-            @RequestParam(defaultValue = "1200") int width,
-            @RequestParam(defaultValue = "1800") int height) {
+            @RequestParam(defaultValue = "1800") int width,
+            @RequestParam(defaultValue = "1200") int height) {
 
         String randomSourceUrl = imageSources.get(random.nextInt(imageSources.size()));
 
